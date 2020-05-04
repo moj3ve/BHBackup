@@ -72,20 +72,32 @@ class ViewController: UIViewController {
     }
     
     @IBAction func Restore(_ sender: Any) {
-        let confirmAlert = UIAlertController(title: "This is a confirm alert", message: "Use of this tool is at your own risk, and I am not responsible for losing any data to you.", preferredStyle: .alert)
-        confirmAlert.addAction(.init(title: "Confirm", style: .default, handler: { (_) in
-            if WA().MakeRestore() {
-                let doneAlert = UIAlertController(title: "Hi", message: "Successfully Restoring files \n now close WhatsApp and open it agin.", preferredStyle: .alert)
-                doneAlert.addAction(.init(title: "OK, thanks", style: .default, handler: nil))
-                self.present(doneAlert, animated: true, completion: nil)
-            } else {
-                let alert = UIAlertController(title: "HI", message: "something error :)", preferredStyle: .alert)
-                alert.addAction(.init(title: "ok", style: .cancel, handler: nil))
-                self.present(alert, animated: true, completion: nil)
-            }
+        let alert = UIAlertController(title: nil, message: "Select option", preferredStyle: .actionSheet)
+        alert.addAction(.init(title: "Add files", style: .default, handler: { (_) in
+            let docPiker = UIDocumentPickerViewController(documentTypes: ["public.data"], in: .import)
+            docPiker.delegate = self
+            self.present(docPiker, animated: true, completion: {
+                docPiker.allowsMultipleSelection = true
+            })
         }))
-        confirmAlert.addAction(.init(title: "Cancel", style: .cancel, handler: nil))
-        self.present(confirmAlert, animated: true, completion: nil)
+        alert.addAction(.init(title: "Restore", style: .default, handler: { (_) in
+            let confirmAlert = UIAlertController(title: "This is a confirm alert", message: "Use of this tool is at your own risk, and I am not responsible for losing any data to you.", preferredStyle: .alert)
+            confirmAlert.addAction(.init(title: "Confirm", style: .default, handler: { (_) in
+                if WA().MakeRestore() {
+                    let doneAlert = UIAlertController(title: "Hi", message: "Successfully Restoring files \n now close WhatsApp and open it agin.", preferredStyle: .alert)
+                    doneAlert.addAction(.init(title: "OK, thanks", style: .default, handler: nil))
+                    self.present(doneAlert, animated: true, completion: nil)
+                } else {
+                    let alert = UIAlertController(title: "HI", message: "something error :)", preferredStyle: .alert)
+                    alert.addAction(.init(title: "ok", style: .cancel, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                }
+            }))
+            confirmAlert.addAction(.init(title: "Cancel", style: .cancel, handler: nil))
+            self.present(confirmAlert, animated: true, completion: nil)
+        }))
+        alert.addAction(.init(title: "Cancel", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
     }
 }
 
@@ -105,6 +117,20 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         
         self.present(ac, animated: true) {
             tableView.deselectRow(at: indexPath, animated: true)
+        }
+    }
+}
+
+extension ViewController: UIDocumentPickerDelegate {
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        for Path in urls {
+            let filepath = URL(fileURLWithPath: "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])/\(Path.lastPathComponent)")
+            do {
+                try FileManager.default.copyItem(at: Path, to: filepath)
+                self.SetupDocumentsDirectoryPath()
+            } catch {
+                print(error)
+            }
         }
     }
 }
