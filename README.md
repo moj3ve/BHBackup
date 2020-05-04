@@ -4,7 +4,7 @@
 # How to use
 ## Backup case:
   - Just hit the Backup button in the left corner.
-## Restor case:
+## Restore case:
   - Open WhatsApp.
   - open BHBackup and hit restore in the right corner.
   - after showing Successfully message close WhatsApp and open it again.
